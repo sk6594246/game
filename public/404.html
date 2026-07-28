@@ -1,0 +1,10 @@
+<!-- public/404.html -->
+<!doctype html>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<script>
+  // GitHub Pages serves this file on 404; we rewrite to index.html with the original path
+  const segmentCount = '/god-game/'.split('/').filter(Boolean).length; // match your repo name
+  const path = location.pathname.split('/').slice(segmentCount + 1).join('/');
+  location.replace(`/${'god-game'}/${path || ''}${location.search}${location.hash}`);
+</script>
