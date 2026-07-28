@@ -1,29 +1,49 @@
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm run build          # outputs to ./dist
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: ./dist }
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
+  lighthouse:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npx lighthouse http://localhost:4173 --preset=desktop --output=json --output-path=./lhci.json --chrome-flags="--headless --no-sandbox" &
+      - run: npx serve -s dist -l 4173 &
+      - run: sleep 10 && cat ./lhci.json
+      - uses: actions/upload-artifact@v4
+        with: { name: lighthouse-report, path: lhci.json }
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build the project
-        run: npm run build  # Ensure this command properly builds your project
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public  # Use the actual output directory
+  deploy:
+    needs: [build, lighthouse]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
