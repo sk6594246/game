@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
-const repoName = 'god-game';               // ← change to your repo name
+const repoName = 'game';               // ← change to your repo name
 const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
