@@ -3,10 +3,10 @@ const CACHE_NAME = 'my-site-cache-v1';
 
 // Define the files to cache
 const urlsToCache = [
-  '/',
-  '/index.html', 
-  '/style.css', 
-  '/script.js'
+  '/game/',             // Home (if needed)
+  '/game/index.html', 
+  '/game/style.css', 
+  '/game/script.js'
 ];
 
 // Install the service worker and cache the files
