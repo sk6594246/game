@@ -21,3 +21,13 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
+<script>
+  // Restore the original URL after 404.html redirect
+  (function () {
+    const saved = sessionStorage.getItem('gh-pages-redirect');
+    if (saved) {
+      history.replaceState(null, '', saved);
+      sessionStorage.removeItem('gh-pages-redirect');
+    }
+  })();
+</script>
